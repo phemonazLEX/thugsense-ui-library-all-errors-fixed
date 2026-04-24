@@ -1,6 +1,5 @@
-
 --[[
-    Made by samet
+    Ui Library made by samet | Errors fixed by phemonaz but all credits to samet
 
     Assign different flags to each element to prevent from configs overriding eachother
     Example script is at the bottom
