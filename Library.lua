@@ -251,7 +251,8 @@ local Library do
         Font = nil,
         KeyList = nil,
 
-        CurrentColorpicker = nil
+        CurrentColorpicker = nil,
+        _alive = true
     }
 
     Library.__index = Library
@@ -847,22 +848,24 @@ end)
         return NewTween
     end
 
-    Library.Unload = function(self)
-        for Index, Value in self.Connections do 
-            Value.Connection:Disconnect()
-        end
-
-        for Index, Value in self.Threads do 
-            coroutine.close(Value)
-        end
-
-        if self.Holder then 
-            self.Holder:Clean()
-        end
-
-        Library = nil 
-        getgenv().Library = nil
+Library.Unload = function(self)
+    self._alive = false   -- <-- ADD THIS FIRST
+    
+    for Index, Value in self.Connections do 
+        Value.Connection:Disconnect()
     end
+
+    for Index, Value in self.Threads do 
+        coroutine.close(Value)
+    end
+
+    if self.Holder then 
+        self.Holder:Clean()
+    end
+
+    Library = nil 
+    getgenv().Library = nil
+end
 
     Library.Thread = function(self, Function)
         local NewThread = coroutine.create(Function)
@@ -876,18 +879,20 @@ end)
         return NewThread
     end
     
-    Library.SafeCall = function(self, Function, ...)
-        local Arguements = { ... }
-        local Success, Result = pcall(Function, TableUnpack(Arguements))
+Library.SafeCall = function(self, Function, ...)
+    if not self._alive then return false end   -- <-- ADD THIS
+    
+    local Arguements = { ... }
+    local Success, Result = pcall(Function, TableUnpack(Arguements))
 
-        if not Success then
-            Library:Notification("Error caught in function, report this to the devs:\n"..Result, 5, FromRGB(255, 0, 0))
-            warn(Result)
-            return false
-        end
-
-        return Success
+    if not Success then
+        Library:Notification("Error caught in function, report this to the devs:\n"..Result, 5, FromRGB(255, 0, 0))
+        warn(Result)
+        return false
     end
+
+    return Success
+end
 
     Library.Connect = function(self, Event, Callback, Name)
         Name = Name or StringFormat("Connection_%s_%s", self.UnnamedConnections + 1, HttpService:GenerateGUID(false))
@@ -1024,8 +1029,9 @@ end)
     end
 
 Library.ChangeItemTheme = function(self, Item, Properties)
+    if not self._alive then return end   -- <-- ADD THIS
     Item = Item.Instance or Item
-    if not Item or not self.ThemeMap[Item] then   -- added nil check
+    if not Item or not self.ThemeMap[Item] then
         return
     end
     self.ThemeMap[Item].Properties = Properties
@@ -3972,23 +3978,33 @@ end
             end)
         end
 
-        function Button:Press()
-            Library:SafeCall(Button.Callback)
+function Button:Press()
+    if not Library._alive then return end  -- <-- CHECK IF STILL ALIVE
+    
+    Library:SafeCall(Button.Callback)
 
-            Items["Text"]:ChangeItemTheme({TextColor3 = "Accent"})
-            Items["Button"]:ChangeItemTheme({BackgroundColor3 = "Accent"})
+    if not Library._alive then return end
 
-            Items["Text"]:Tween(nil, {TextColor3 = Library.Theme.Accent})
-            Items["Button"]:Tween(nil, {BackgroundColor3 = Library.Theme.Accent})
+    Items["Text"]:ChangeItemTheme({TextColor3 = "Accent"})
+    Items["Button"]:ChangeItemTheme({BackgroundColor3 = "Accent"})
 
-            task.wait(0.1)
+    if not Library._alive then return end
 
-            Items["Text"]:ChangeItemTheme({TextColor3 = "Text"})
-            Items["Button"]:ChangeItemTheme({BackgroundColor3 = "Element"})
+    Items["Text"]:Tween(nil, {TextColor3 = Library.Theme.Accent})
+    Items["Button"]:Tween(nil, {BackgroundColor3 = Library.Theme.Accent})
 
-            Items["Text"]:Tween(nil, {TextColor3 = Library.Theme.Text})
-            Items["Button"]:Tween(nil, {BackgroundColor3 = Library.Theme.Element})
-        end
+    task.wait(0.1)
+
+    if not Library._alive then return end   -- <-- CRITICAL CHECK AFTER WAIT
+
+    Items["Text"]:ChangeItemTheme({TextColor3 = "Text"})
+    Items["Button"]:ChangeItemTheme({BackgroundColor3 = "Element"})
+
+    if not Library._alive then return end
+
+    Items["Text"]:Tween(nil, {TextColor3 = Library.Theme.Text})
+    Items["Button"]:Tween(nil, {BackgroundColor3 = Library.Theme.Element})
+end
 
         function Button:SetVisiblity(Bool)
             Items["Button"].Instance.Visible = Bool
