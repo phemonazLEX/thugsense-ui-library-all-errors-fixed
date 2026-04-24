@@ -463,13 +463,12 @@ local Library do
             Library:AddToTheme(self, Properties)
         end
 
-        Instances.ChangeItemTheme = function(self, Properties)
-            if not self.Instance then 
-                return
-            end
-
-            Library:ChangeItemTheme(self, Properties)
-        end
+Instances.ChangeItemTheme = function(self, Properties)
+    if not self.Instance or not self.Instance.Parent then  -- check if still alive
+        return
+    end
+    Library:ChangeItemTheme(self, Properties)
+end
 
         Instances.Connect = function(self, Event, Callback, Name)
             if not self.Instance then 
@@ -836,12 +835,14 @@ local Library do
             [Property] = Visibility and OldTransparency or 1
         }, true)
 
-        Library:Connect(NewTween.Tween.Completed, function()
-            if not Visibility then 
-                task.wait()
-                Item[Property] = OldTransparency
-            end
-        end)
+Library:Connect(NewTween.Tween.Completed, function()
+    if not Visibility then 
+        task.wait()
+        if Item and Item.Parent then   -- ensure item still exists
+            Item[Property] = OldTransparency
+        end
+    end
+end)
 
         return NewTween
     end
@@ -1022,16 +1023,14 @@ local Library do
         end
     end
 
-    Library.ChangeItemTheme = function(self, Item, Properties)
-        Item = Item.Instance or Item
-
-        if not self.ThemeMap[Item] then 
-            return
-        end
-
-        self.ThemeMap[Item].Properties = Properties
-        self.ThemeMap[Item] = self.ThemeMap[Item]
+Library.ChangeItemTheme = function(self, Item, Properties)
+    Item = Item.Instance or Item
+    if not Item or not self.ThemeMap[Item] then   -- added nil check
+        return
     end
+    self.ThemeMap[Item].Properties = Properties
+    self.ThemeMap[Item] = self.ThemeMap[Item]
+end
 
     Library.ChangeTheme = function(self, Theme, Color)
         self.Theme[Theme] = Color
