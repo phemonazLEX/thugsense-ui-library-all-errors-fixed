@@ -849,22 +849,17 @@ end)
     end
 
 Library.Unload = function(self)
-    self._alive = false   -- <-- ADD THIS FIRST
-    
+    self._alive = false   -- mark as dead
     for Index, Value in self.Connections do 
         Value.Connection:Disconnect()
     end
-
     for Index, Value in self.Threads do 
         coroutine.close(Value)
     end
-
     if self.Holder then 
         self.Holder:Clean()
     end
-
-    Library = nil 
-    getgenv().Library = nil
+    -- Do NOT set Library = nil or getgenv().Library = nil
 end
 
     Library.Thread = function(self, Function)
@@ -3979,31 +3974,29 @@ end
         end
 
 function Button:Press()
-    if not Library._alive then return end  -- <-- CHECK IF STILL ALIVE
-    
-    Library:SafeCall(Button.Callback)
+    local lib = Library  -- capture local reference BEFORE any yield
+    if not lib or not lib._alive then return end
 
-    if not Library._alive then return end
+    lib:SafeCall(Button.Callback)
+    if not lib._alive then return end
 
     Items["Text"]:ChangeItemTheme({TextColor3 = "Accent"})
     Items["Button"]:ChangeItemTheme({BackgroundColor3 = "Accent"})
+    if not lib._alive then return end
 
-    if not Library._alive then return end
-
-    Items["Text"]:Tween(nil, {TextColor3 = Library.Theme.Accent})
-    Items["Button"]:Tween(nil, {BackgroundColor3 = Library.Theme.Accent})
+    Items["Text"]:Tween(nil, {TextColor3 = lib.Theme.Accent})
+    Items["Button"]:Tween(nil, {BackgroundColor3 = lib.Theme.Accent})
 
     task.wait(0.1)
 
-    if not Library._alive then return end   -- <-- CRITICAL CHECK AFTER WAIT
+    if not lib._alive then return end   -- critical after the wait
 
     Items["Text"]:ChangeItemTheme({TextColor3 = "Text"})
     Items["Button"]:ChangeItemTheme({BackgroundColor3 = "Element"})
+    if not lib._alive then return end
 
-    if not Library._alive then return end
-
-    Items["Text"]:Tween(nil, {TextColor3 = Library.Theme.Text})
-    Items["Button"]:Tween(nil, {BackgroundColor3 = Library.Theme.Element})
+    Items["Text"]:Tween(nil, {TextColor3 = lib.Theme.Text})
+    Items["Button"]:Tween(nil, {BackgroundColor3 = lib.Theme.Element})
 end
 
         function Button:SetVisiblity(Bool)
