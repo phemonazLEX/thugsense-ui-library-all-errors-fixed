@@ -224,7 +224,7 @@ local Library do
             Assets = "scriptname/Assets"
         },
 
-        Images = { -- you're welcome to reupload the images and replace it with your own links
+        Images = {
             ["Saturation"] = {"Saturation.png", "https://github.com/sametexe001/images/blob/main/saturation.png?raw=true" },
             ["Value"] = { "Value.png", "https://github.com/sametexe001/images/blob/main/value.png?raw=true" },
             ["Hue"] = { "Hue.png", "https://github.com/sametexe001/images/blob/main/hue.png?raw=true" },
@@ -233,7 +233,6 @@ local Library do
             ["Resize"] = { "Resize.png", "https://github.com/sametexe001/images/blob/main/resize.png?raw=true" },
         },
 
-        -- Ignore below
         Pages = { },
         Sections = { },
         Connections = { },
@@ -333,7 +332,6 @@ local Library do
         ["RightAlt"]          = "RightAlt"
     }
 
-    -- Files 
     for _, FileName in Library.Folders do
         if not isfolder(FileName) then
             makefolder(FileName)
@@ -465,7 +463,7 @@ local Library do
         end
 
 Instances.ChangeItemTheme = function(self, Properties)
-    if not self.Instance or not self.Instance.Parent then  -- check if still alive
+    if not self.Instance or not self.Instance.Parent then
         return
     end
     Library:ChangeItemTheme(self, Properties)
@@ -641,7 +639,6 @@ end
 
                 StartMouse = UserInputService:GetMouseLocation()
 
-                -- store offsets, not absolute screen pos
                 StartPosition = Vector2New(Gui.Position.X.Offset, Gui.Position.Y.Offset)
                 StartSize = Vector2New(Gui.Size.X.Offset, Gui.Size.Y.Offset)
                 
@@ -839,7 +836,7 @@ end
 Library:Connect(NewTween.Tween.Completed, function()
     if not Visibility then 
         task.wait()
-        if Item and Item.Parent then   -- ensure item still exists
+        if Item and Item.Parent then
             Item[Property] = OldTransparency
         end
     end
@@ -849,7 +846,7 @@ end)
     end
 
 Library.Unload = function(self)
-    self._alive = false   -- mark as dead
+    self._alive = false
     for Index, Value in self.Connections do 
         Value.Connection:Disconnect()
     end
@@ -859,7 +856,6 @@ Library.Unload = function(self)
     if self.Holder then 
         self.Holder:Clean()
     end
-    -- Do NOT set Library = nil or getgenv().Library = nil
 end
 
     Library.Thread = function(self, Function)
@@ -875,7 +871,7 @@ end
     end
     
 Library.SafeCall = function(self, Function, ...)
-    if not self._alive then return false end   -- <-- ADD THIS
+    if not self._alive then return false end
     
     local Arguements = { ... }
     local Success, Result = pcall(Function, TableUnpack(Arguements))
@@ -1024,7 +1020,7 @@ end
     end
 
 Library.ChangeItemTheme = function(self, Item, Properties)
-    if not self._alive then return end   -- <-- ADD THIS
+    if not self._alive then return end
     Item = Item.Instance or Item
     if not Item or not self.ThemeMap[Item] then
         return
@@ -2559,7 +2555,6 @@ end
                     BackgroundColor3 = Library.Theme.Background
                 })  Items["FloatingButton"]:AddToTheme({BackgroundColor3 = "Background"})
 
-                --
                 local Gui = Items["FloatingButton"].Instance
 
                 local Dragging = false 
@@ -3974,7 +3969,7 @@ end
         end
 
 function Button:Press()
-    local lib = Library  -- capture local reference BEFORE any yield
+    local lib = Library
     if not lib or not lib._alive then return end
 
     lib:SafeCall(Button.Callback)
@@ -3989,7 +3984,7 @@ function Button:Press()
 
     task.wait(0.1)
 
-    if not lib._alive then return end   -- critical after the wait
+    if not lib._alive then return end
 
     Items["Text"]:ChangeItemTheme({TextColor3 = "Text"})
     Items["Button"]:ChangeItemTheme({BackgroundColor3 = "Element"})
@@ -5175,7 +5170,7 @@ end
     Library.CreateSettingsPage = function(self, Window, Watermark, KeybindList)
         local SettingsTab = Window:Page({Name = "Settings", Columns = 2, Subtabs = false})
 
-        do -- Settings Tab
+        do
             local SettingsSection = SettingsTab:Section({Name = "Settings", Side = 2})
             local ConfigsSection = SettingsTab:Section({Name = "Profiles", Side = 1})
         
