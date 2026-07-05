@@ -1,3 +1,4 @@
+
 --[[
     Ui Library made by samet | Errors fixed by phemonaz but all credits to samet
 
@@ -523,19 +524,15 @@ end
             local DragStart
             local StartPosition 
         
-            local Set = function(Input)
-                local DragDelta = Input.Position - DragStart
-                local NewX = StartPosition.X.Offset + DragDelta.X
-                local NewY = StartPosition.Y.Offset + DragDelta.Y
+local Set = function(Input)
+    local DragDelta = Input.Position - DragStart
+    local NewX = StartPosition.X.Offset + DragDelta.X
+    local NewY = StartPosition.Y.Offset + DragDelta.Y
 
-                local ScreenSize = Gui.Parent.AbsoluteSize
-                local GuiSize = Gui.AbsoluteSize
-        
-                NewX = MathClamp(NewX, 0, ScreenSize.X - GuiSize.X)
-                NewY = MathClamp(NewY, 0, ScreenSize.Y - GuiSize.Y)
-        
-                self:Tween(TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2New(0, NewX, 0, NewY)})
-            end
+    -- No clamping – window can go anywhere
+
+    self:Tween(TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2New(0, NewX, 0, NewY)})
+end
         
             local InputChanged
         
