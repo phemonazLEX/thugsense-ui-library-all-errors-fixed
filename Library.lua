@@ -2242,7 +2242,8 @@ end
                 if Library:IsMouseOverFrame(Items["Window"]) then
                     return
                 end
-                if Keybind.SetOpen then
+
+                if Keybind and Keybind.SetOpen then
                     pcall(function()
                         Keybind:SetOpen(false)
                     end)
