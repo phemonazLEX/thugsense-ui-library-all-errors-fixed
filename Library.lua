@@ -1840,7 +1840,7 @@ end
 
         Library:Connect(UserInputService.InputBegan, function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                if not Colorpicker.IsOpen then
+                if not Colorpicker.IsOpen  then
                     return
                 end
 
@@ -1853,8 +1853,6 @@ end
                         Colorpicker:SetOpen(false)
                     end)
                 end
-            end
-        end)
 
         if Data.Default then 
             Colorpicker:Set(Data.Default, Data.Alpha)
@@ -2244,14 +2242,11 @@ end
                 if Library:IsMouseOverFrame(Items["Window"]) then
                     return
                 end
-
                 if Keybind.SetOpen then
                     pcall(function()
                         Keybind:SetOpen(false)
                     end)
                 end
-            end
-        end)
 
         Library:Connect(UserInputService.InputEnded, function(Input)
             if tostring(Input.KeyCode) == Keybind.Key or tostring(Input.UserInputType) == Keybind.Key then
@@ -2502,8 +2497,8 @@ function Window:SetOpen(Bool)
     Library.Holder.Instance.Enabled = Bool
     updateMouseUnlock()
 
-    -- Close any open sub-windows first to prevent nil SetOpen calls
-    if not Bool and Library.CurrentColorpicker then
+    -- Close any open sub-windows (colorpicker/keybind) to prevent nil errors
+    if not Bool and Library.CurrentColorpicker and Library.CurrentColorpicker.SetOpen then
         pcall(function()
             Library.CurrentColorpicker:SetOpen(false)
         end)
