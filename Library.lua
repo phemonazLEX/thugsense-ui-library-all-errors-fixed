@@ -155,9 +155,9 @@ local Library do
     local CoreGui = cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
 
     -- PUT THIS AT THE TOP OF THE SCRIPT (Under your services)
+-- PUT THIS AT THE TOP OF THE SCRIPT (Under your services)
     local originalMouseBehavior = UserInputService.MouseBehavior
     local mouseUnlockConnection = nil
-    Library.Open = true -- If Library isn't created yet, place this right after "local Library = {}"
 
     gethui = gethui or function()
         return CoreGui
@@ -200,6 +200,7 @@ local Library do
     local IsMobile = UserInputService.TouchEnabled or false
 
     Library = {
+        Open = true,
         Flags = { },
         
         Theme = {
@@ -869,8 +870,7 @@ Library.Unload = function(self)
     end
 end
 
-
-      local function updateMouseUnlock()
+local function updateMouseUnlock()
     if Library.Open then
         originalMouseBehavior = UserInputService.MouseBehavior
         if not mouseUnlockConnection then
@@ -889,8 +889,7 @@ end
     end
 end
 
--- Initialize the loop on execution state
-Library.Open = true 
+-- Initialize the unlock check on script startup
 updateMouseUnlock() 
 
 -- Hook up the menu keybind event listener
@@ -902,7 +901,7 @@ Library:Connect(UserInputService.InputBegan, function(input, gameProcessed)
         
         updateMouseUnlock()
     end
-end)              
+end)          
 
                     
     Library.Thread = function(self, Function)
