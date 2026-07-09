@@ -1594,8 +1594,10 @@ end
                 Items["ColorpickerWindow"].Instance.Visible = true
                 Items["ColorpickerWindow"].Instance.Position = UDim2New(0, Data.Parent.Instance.AbsolutePosition.X, 0, Data.Parent.Instance.AbsolutePosition.Y + 15)
 
-                if Library.CurrentColorpicker then
-                    Library.CurrentColorpicker:SetOpen(false)
+                if Library.CurrentColorpicker and Library.CurrentColorpicker.SetOpen then
+                    pcall(function()
+                        Library.CurrentColorpicker:SetOpen(false)
+                    end)
                     Library.CurrentColorpicker = nil 
                 end
 
@@ -1838,7 +1840,7 @@ end
 
         Library:Connect(UserInputService.InputBegan, function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                if not Colorpicker.IsOpen  then
+                if not Colorpicker.IsOpen then
                     return
                 end
 
@@ -1846,7 +1848,11 @@ end
                     return
                 end
 
-                Colorpicker:SetOpen(false)
+                if Colorpicker.SetOpen then
+                    pcall(function()
+                        Colorpicker:SetOpen(false)
+                    end)
+                end
             end
         end)
 
@@ -2239,7 +2245,11 @@ end
                     return
                 end
 
-                Keybind:SetOpen(false)
+                if Keybind.SetOpen then
+                    pcall(function()
+                        Keybind:SetOpen(false)
+                    end)
+                end
             end
         end)
 
@@ -2485,10 +2495,20 @@ end
 
 function Window:SetOpen(Bool)
     if Debounce then return end
+    if not Window or not Items or not Items["MainFrame"] then return end
+
     Window.IsOpen = Bool
-    Library.Open = Bool                     -- ← sync Library.Open
-    Library.Holder.Instance.Enabled = Bool  -- ← toggle the holder
-    updateMouseUnlock()                     -- ← update mouse behavior
+    Library.Open = Bool
+    Library.Holder.Instance.Enabled = Bool
+    updateMouseUnlock()
+
+    -- Close any open sub-windows first to prevent nil SetOpen calls
+    if not Bool and Library.CurrentColorpicker then
+        pcall(function()
+            Library.CurrentColorpicker:SetOpen(false)
+        end)
+        Library.CurrentColorpicker = nil
+    end
 
     Debounce = true
     if Bool then
@@ -2513,7 +2533,9 @@ function Window:SetOpen(Bool)
 
     Library:Connect(NewTween.Tween.Completed, function()
         Debounce = false
-        Items["MainFrame"].Instance.Visible = Bool
+        if Items and Items["MainFrame"] and Items["MainFrame"].Instance then
+            Items["MainFrame"].Instance.Visible = Bool
+        end
     end)
 end
 
