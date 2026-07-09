@@ -2482,44 +2482,39 @@ end
 
         local Debounce = false
 
-        function Window:SetOpen(Bool)
-            if Debounce then 
-                return 
+function Window:SetOpen(Bool)
+    if Debounce then return end
+    Window.IsOpen = Bool
+    Library.Open = Bool                     -- ← sync Library.Open
+    Library.Holder.Instance.Enabled = Bool  -- ← toggle the holder
+    updateMouseUnlock()                     -- ← update mouse behavior
+
+    Debounce = true
+    if Bool then
+        Items["MainFrame"].Instance.Visible = true
+    end
+
+    local Descendants = Items["MainFrame"].Instance:GetDescendants()
+    TableInsert(Descendants, Items["MainFrame"].Instance)
+
+    local NewTween
+    for Index, Value in Descendants do
+        local ValueIndex = Library:GetTransparencyPropertyFromItem(Value)
+        if not ValueIndex then continue end
+        if type(ValueIndex) == "table" then
+            for _, Property in ValueIndex do
+                NewTween = Library:FadeItem(Value, Property, Bool, Window.FadeSpeed)
             end
-
-            Window.IsOpen = Bool
-
-            Debounce = true 
-
-            if Bool then 
-                Items["MainFrame"].Instance.Visible = true
-            end
-
-            local Descendants = Items["MainFrame"].Instance:GetDescendants()
-            TableInsert(Descendants, Items["MainFrame"].Instance)
-
-            local NewTween
-            for Index, Value in Descendants do 
-                local ValueIndex = Library:GetTransparencyPropertyFromItem(Value)
-
-                if not ValueIndex then 
-                    continue
-                end
-
-                if type(ValueIndex) == "table" then
-                    for _, Property in ValueIndex do 
-                        NewTween = Library:FadeItem(Value, Property, Bool, Window.FadeSpeed)
-                    end
-                else
-                    NewTween = Library:FadeItem(Value, ValueIndex, Bool, Window.FadeSpeed)
-                end
-            end
-
-            Library:Connect(NewTween.Tween.Completed, function()
-                Debounce = false
-                Items["MainFrame"].Instance.Visible = Bool
-            end)
+        else
+            NewTween = Library:FadeItem(Value, ValueIndex, Bool, Window.FadeSpeed)
         end
+    end
+
+    Library:Connect(NewTween.Tween.Completed, function()
+        Debounce = false
+        Items["MainFrame"].Instance.Visible = Bool
+    end)
+end
 
         Library:Connect(UserInputService.InputBegan, function(Input)
             if tostring(Input.KeyCode) == Library.MenuKeybind or tostring(Input.UserInputType) == Library.MenuKeybind then
@@ -5176,15 +5171,6 @@ end
     end
 
     updateMouseUnlock()
-
-    Library:Connect(UserInputService.InputBegan, function(input, gameProcessed)
-        if gameProcessed then return end
-        if input.KeyCode == Library.MenuKeybind then
-            Library.Open = not Library.Open
-            Library.Holder.Instance.Enabled = Library.Open
-            updateMouseUnlock()
-        end
-    end)
 end
 
 getgenv().Library = Library
