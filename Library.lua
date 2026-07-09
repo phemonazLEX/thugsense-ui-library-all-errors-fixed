@@ -13,8 +13,6 @@ local Library do
     local RunService = game:GetService("RunService")
     local CoreGui = cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
 
-    -- PUT THIS AT THE TOP OF THE SCRIPT (Under your services)
--- PUT THIS AT THE TOP OF THE SCRIPT (Under your services)
     local originalMouseBehavior = UserInputService.MouseBehavior
     local mouseUnlockConnection = nil
 
@@ -394,8 +392,6 @@ local Set = function(Input)
     local DragDelta = Input.Position - DragStart
     local NewX = StartPosition.X.Offset + DragDelta.X
     local NewY = StartPosition.Y.Offset + DragDelta.Y
-
-    -- No clamping – window can go anywhere
 
     self:Tween(TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2New(0, NewX, 0, NewY)})
 end
@@ -5159,7 +5155,7 @@ end
             end
         end      
     end
-                                        -- Mouse unlock logic (runs immediately, not inside CreateSettingsPage)
+                                        
     local function updateMouseUnlock()
         if Library.Open then
             originalMouseBehavior = UserInputService.MouseBehavior
