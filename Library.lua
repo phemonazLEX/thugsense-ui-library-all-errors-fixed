@@ -263,6 +263,9 @@ local Library do
     Library.Sections.__index = Library.Sections
     Library.Pages.__index = Library.Pages
 
+    local originalMouseBehavior = UserInputService.MouseBehavior
+    local mouseUnlockConnection = nil
+
     local Keys = {
         ["Unknown"]           = "Unknown",
         ["Backspace"]         = "Back",
@@ -866,6 +869,42 @@ Library.Unload = function(self)
     end
 end
 
+
+      local function updateMouseUnlock()
+    if Library.Open then
+        originalMouseBehavior = UserInputService.MouseBehavior
+        if not mouseUnlockConnection then
+            mouseUnlockConnection = RunService.RenderStepped:Connect(function()
+                if Library.Open then
+                    UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+                end
+            end)
+        end
+    else
+        if mouseUnlockConnection then
+            mouseUnlockConnection:Disconnect()
+            mouseUnlockConnection = nil
+        end
+        UserInputService.MouseBehavior = originalMouseBehavior
+    end
+end
+
+-- Initialize the loop on execution state
+Library.Open = true 
+updateMouseUnlock() 
+
+-- Hook up the menu keybind event listener
+Library:Connect(UserInputService.InputBegan, function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Library.MenuKeybind then
+        Library.Open = not Library.Open
+        Library.Holder.Instance.Enabled = Library.Open
+        
+        updateMouseUnlock()
+    end
+end)              
+
+                    
     Library.Thread = function(self, Function)
         local NewThread = coroutine.create(Function)
         
