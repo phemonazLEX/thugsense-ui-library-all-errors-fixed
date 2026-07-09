@@ -154,6 +154,11 @@ local Library do
     local RunService = game:GetService("RunService")
     local CoreGui = cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
 
+    -- PUT THIS AT THE TOP OF THE SCRIPT (Under your services)
+    local originalMouseBehavior = UserInputService.MouseBehavior
+    local mouseUnlockConnection = nil
+    Library.Open = true -- If Library isn't created yet, place this right after "local Library = {}"
+
     gethui = gethui or function()
         return CoreGui
     end
@@ -843,6 +848,13 @@ end)
 
 Library.Unload = function(self)
     self._alive = false
+
+    if mouseUnlockConnection then
+        mouseUnlockConnection:Disconnect()
+        mouseUnlockConnection = nil
+    end
+    UserInputService.MouseBehavior = originalMouseBehavior
+                        
     for Index, Value in self.Connections do 
         Value.Connection:Disconnect()
     end
