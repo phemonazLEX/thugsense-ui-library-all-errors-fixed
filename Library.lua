@@ -1,3 +1,4 @@
+
 local LoadingTick = os.clock()
 
 if getgenv().Library then 
@@ -2516,25 +2517,17 @@ function Window:SetOpen(Bool)
     end)
 end
 
-local thisWindow = Window
+        Library:Connect(UserInputService.InputBegan, function(Input)
+            if tostring(Input.KeyCode) == Library.MenuKeybind or tostring(Input.UserInputType) == Library.MenuKeybind then
+                Window:SetOpen(not Window.IsOpen)
+            end
+        end)
 
-Library:Connect(UserInputService.InputBegan, function(Input)
-    if tostring(Input.KeyCode) == Library.MenuKeybind or tostring(Input.UserInputType) == Library.MenuKeybind then
-        if thisWindow then
-            thisWindow:SetOpen(not thisWindow.IsOpen)
-        else
-            warn("Keybind triggered but window is nil")
+        if IsMobile then
+            Items["FloatingButton"]:Connect("MouseButton1Down", function()
+                Window:SetOpen(not Window.IsOpen)
+            end)
         end
-    end
-end)
-
-if IsMobile then
-    Items["FloatingButton"]:Connect("MouseButton1Down", function()
-        if thisWindow then
-            thisWindow:SetOpen(not thisWindow.IsOpen)
-        end
-    end)
-end
 
         Window.Elements = Items
 
