@@ -1853,6 +1853,8 @@ end
                         Colorpicker:SetOpen(false)
                     end)
                 end
+            end
+        end)
 
         if Data.Default then 
             Colorpicker:Set(Data.Default, Data.Alpha)
@@ -2242,12 +2244,12 @@ end
                 if Library:IsMouseOverFrame(Items["Window"]) then
                     return
                 end
-
-                if Keybind and Keybind.SetOpen then
+                if Keybind.SetOpen then
                     pcall(function()
                         Keybind:SetOpen(false)
                     end)
                 end
+            end
 
         Library:Connect(UserInputService.InputEnded, function(Input)
             if tostring(Input.KeyCode) == Keybind.Key or tostring(Input.UserInputType) == Keybind.Key then
