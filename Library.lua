@@ -123,8 +123,6 @@ local Library do
     Library.Sections.__index = Library.Sections
     Library.Pages.__index = Library.Pages
 
-    local originalMouseBehavior = UserInputService.MouseBehavior
-    local mouseUnlockConnection = nil
 
     local Keys = {
         ["Unknown"]           = "Unknown",
@@ -5159,42 +5157,39 @@ end
             if IsAutoload ~= "" then
                 Library:LoadConfig(IsAutoload)
             end
+        end      
+    end
+                                        -- Mouse unlock logic (runs immediately, not inside CreateSettingsPage)
+    local function updateMouseUnlock()
+        if Library.Open then
+            originalMouseBehavior = UserInputService.MouseBehavior
+            if not mouseUnlockConnection then
+                mouseUnlockConnection = RunService.RenderStepped:Connect(function()
+                    if Library.Open then
+                        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+                    end
+                end)
+            end
+        else
+            if mouseUnlockConnection then
+                mouseUnlockConnection:Disconnect()
+                mouseUnlockConnection = nil
+            end
+            UserInputService.MouseBehavior = originalMouseBehavior
         end
     end
+
+    updateMouseUnlock()
+
+    Library:Connect(UserInputService.InputBegan, function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Library.MenuKeybind then
+            Library.Open = not Library.Open
+            Library.Holder.Instance.Enabled = Library.Open
+            updateMouseUnlock()
+        end
+    end)
 end
-
-local function updateMouseUnlock()
-    if Library.Open then
-        originalMouseBehavior = UserInputService.MouseBehavior
-        if not mouseUnlockConnection then
-            mouseUnlockConnection = RunService.RenderStepped:Connect(function()
-                if Library.Open then
-                    UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-                end
-            end)
-        end
-    else
-        if mouseUnlockConnection then
-            mouseUnlockConnection:Disconnect()
-            mouseUnlockConnection = nil
-        end
-        UserInputService.MouseBehavior = originalMouseBehavior
-    end
-end
-
--- Initialize the unlock check on script startup
-updateMouseUnlock() 
-
--- Hook up the menu keybind event listener
-Library:Connect(UserInputService.InputBegan, function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == Library.MenuKeybind then
-        Library.Open = not Library.Open
-        Library.Holder.Instance.Enabled = Library.Open
-        
-        updateMouseUnlock()
-    end
-end)    
 
 getgenv().Library = Library
 return Library
