@@ -4602,6 +4602,10 @@ end
             return Keybind, Extension
         end
 
+Label.SetText = function(self, newText)
+    Items["Text"].Instance.Text = newText
+end
+
         return Label
     end
 
